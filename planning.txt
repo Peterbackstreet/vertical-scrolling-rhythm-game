@@ -1,0 +1,58 @@
+1. Game Loop {
+  -init attribute
+  -Update and Draw Loop
+  -load and unload assets
+}
+
+2. Audio {
+  -load audio in
+  -play pause stop
+  -display current audio time
+}
+
+3. Timing {
+  -gameTime/chartTime
+  -BPM
+  -Beat intervals (time between chart) -> (60sec)*(1000ms)/BPM
+  -snap note to the closet beat
+}
+
+4. Note Rendering {
+  -note data structure {
+    -type
+    -lane
+    -time
+  }
+  -spawning note
+  -match the spawn time with chartTime
+}
+
+5. Input + Judgment {
+  -get key input
+  -hit window
+  -detect hit
+}
+
+6. Scoring {
+  -add tolerance window(bad ,good ,perfect)
+  -combo
+  -accuracy
+}
+
+7. Chart Loading {
+  -make a chart format(JSON maybe IDK)
+  -load the notes to the note data structure
+}
+
+8. Chart Editor {
+  -UI 
+  -loading audio
+  -a timeline
+    -set BPM
+    -time signature
+    -make BPM and ts effects only a certain part
+  -placing note
+  -placing hold note
+  -snap notes to BPM/ts 
+  -load/save chart
+}
