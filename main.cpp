@@ -1,17 +1,19 @@
 #include "include/rayib.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 const Color BG = Color{0, 0, 0, 255};
 
-std::string chartName;
-Music music;
 std::vector<std::string> songList = {"Synthesis"};
+std::string chartID, chartName, artist;
+int BPM = -1;
+Music music;
 
 void loadChart() {
-  std::ifstream chart(chartName);
+  std::ifstream chart(chartID+".txt");
 
   if(!chart.is_open()) {
     std::cerr << "file to open the chart file\n"; 
@@ -20,8 +22,24 @@ void loadChart() {
 
   std::string line;
   
-  while(std::getline(file, line)) {
+  while(std::getline(chart, line)) {
+    if(!chartName.empty() && line.substr(0,4) == "NAME") {
+      int pos = line.find(":");
+      chartName = line.substr(pos + 1);
+      continue;
+    }
 
+    if(!artist.empty() && line.substr(0,6) == "ARTIST") {
+      int pos = line.find(":");
+      artist = line.substr(pos + 1);
+      continue;
+    }
+
+    if(BPM != -1 && line.substr(0,3) == "BPM") {
+      int pos = line.find(":");
+      BPM = stoi(line.substr(pos + 1));
+      continue;
+    }
   }
 
 }
@@ -32,7 +50,7 @@ void songSelection() {
   std::cout << "enter chart number:";
   // std::cin >> x;
   x -= 1;
-  chartName = songList[0];
+  chartID = songList[0];
 }
 
 int main() {
