@@ -1,7 +1,6 @@
 #include "include/rayib.h"
 #include <iostream>
 #include <fstream>
-#include <iterator>
 #include <ostream>
 #include <string>
 #include <sstream>
@@ -15,9 +14,11 @@ const string song_folder = "songs/";
 string selected_song;
 vector<std::string> songList = {"Synthesis"};
 
-string chartTime_curr;
-string chartLength;
+float chartTime_curr;
+float chartLength;
 bool pause = false;
+
+float scrollSpeed = 5;
 
 class Note {
   public:
@@ -28,8 +29,8 @@ class Note {
     Note(int type, int lane, float time, float hold_duration) {
       this->type = type;
       this->lane = lane;
-      this->time = time;
-      this->hold_duration = hold_duration;
+      this->time = time * 0.001;
+      this->hold_duration = hold_duration * 0.001;
     }
     void display() {
       cout << "type: " << type<< ' ';
@@ -64,11 +65,11 @@ class chartData {
       Music music = LoadMusicStream(audioFile);
 
       if (music.stream.buffer == NULL || music.stream.sampleRate == 0) {
-        std::cerr << "Failed to load music: \n";
+        std::cerr << "Failed to load music \n";
         exit(0);
       }
 
-      chartLength = std::to_string(GetMusicTimeLength(music));
+      chartLength = GetMusicTimeLength(music);
 
       return music;
     }
@@ -93,16 +94,10 @@ class chartData {
 
     }
 
-    void displayNotes() {
-      for (Note& note : notes) {
-        note.display();
-      }
-    }
 };
 
 
 void getInput(chartData& chart) {
-
   if (IsKeyPressed(KEY_SPACE))
   {
     pause = !pause;
@@ -114,15 +109,24 @@ void getInput(chartData& chart) {
 class Game{
   public:
     void update(chartData& chart) {
-      chartTime_curr = std::to_string(GetMusicTimePlayed(chart.music));
-
-      draw(chart, chartTime_curr);
+      chartTime_curr = GetMusicTimePlayed(chart.music);
+      updateNotes(chart, chartTime_curr);
+      draw(chart, std::to_string(chartTime_curr));
     }
 
     void draw(chartData chart, string chartTime) {
-      chartTime += " / " + chartLength; 
+      string length = std::to_string(chartLength);
+      chartTime += " / " + length; 
       const char* timePlayed = chartTime.c_str();
       DrawText(timePlayed, 10, 10, 20, WHITE);
+    }
+
+    void updateNotes(chartData& chart,float chartTime) {
+      for (Note& note : chart.notes) {
+        float notePos = (note.time - chartTime) * scrollSpeed;
+        cout << notePos << " ";
+      }
+      cout << std::endl;
     }
 };
 
@@ -139,8 +143,6 @@ int main() {
 
   chart.loadChartData();
   cout << "name: "<< chart.name << "\nartist: " << chart.artist << "\nBPM: " << chart.BPM << '\n';
-  chart.displayNotes();
-
 
   PlayMusicStream(chart.music);
   pause = true;
