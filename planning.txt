@@ -14,7 +14,6 @@
   -gameTime/chartTime
   -BPM
   -Beat intervals (time between chart) -> (60sec)*(1000ms)/BPM
-  -snap note to the closet beat
 }
 
 4. Note Rendering {

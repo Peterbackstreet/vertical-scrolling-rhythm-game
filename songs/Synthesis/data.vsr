@@ -1,0 +1,12 @@
+[TITLE] Synthesis
+[ARTIST] tn-shi
+[BPM] 180
+[SONG] Synthesis.mp3
+
+            <==NOTE DATA==>
+<TYPE>:<LANE>:<TIME(ms)>:<HOLD_DURATION>
+#0:1:1000:0
+#0:3:1500:0
+#1:2:3000:2000
+#0:1:5000:0
+

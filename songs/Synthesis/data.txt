@@ -1,4 +1,0 @@
-#TITLE Synthesis
-#ARTIST tn-shi
-#BPM 180
-#SONG Synthesis.mp3

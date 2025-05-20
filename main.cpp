@@ -4,6 +4,7 @@
 #include <iterator>
 #include <ostream>
 #include <string>
+#include <sstream>
 #include <vector>
 
 using std::string;using std::vector;using std::cout;
@@ -18,11 +19,44 @@ string chartTime_curr;
 string chartLength;
 bool pause = false;
 
+class Note {
+  public:
+    int type;
+    int lane;
+    float time;
+    float hold_duration = 0;
+    Note(int type, int lane, float time, float hold_duration) {
+      this->type = type;
+      this->lane = lane;
+      this->time = time;
+      this->hold_duration = hold_duration;
+    }
+    void display() {
+      cout << "type: " << type<< ' ';
+      cout << "lane: " << lane<< ' ';
+      cout << "time: " << time << ' ';
+      cout << "hold: " << hold_duration << '\n';
+    }
+};
+
 class chartData {
   public:
     string name, artist;
     double BPM = -1;
     Music music;
+    float offset = 0;
+    vector<Note> notes;
+
+    void insertNoteData(string line) {
+      string type, lane, time, hold_duration = "0";
+      std::istringstream ss(line);
+      std::getline(ss, type, ':');
+      std::getline(ss, lane, ':');
+      std::getline(ss, time, ':');
+      std::getline(ss, hold_duration, ':');
+
+      notes.push_back(Note(stoi(type), stoi(lane), stof(time), stof(hold_duration)));
+    }
 
     Music loadMusic(string song) {
       song = song_folder + selected_song + '/' + song;
@@ -39,9 +73,8 @@ class chartData {
       return music;
     }
 
-    chartData loadChartData() {
-      chartData data;
-      std::ifstream file(song_folder + selected_song + "/data.txt");
+    void loadChartData() {
+      std::ifstream file(song_folder + selected_song + "/data.vsr");
 
       if(!file.is_open()) {
         std::cerr << "can't open " + songList[0] << '\n';
@@ -50,25 +83,27 @@ class chartData {
       const string s;
       string line;
       while(std::getline(file,line)) {
-        if(line.find("#TITLE") == 0) data.name = line.substr(7);
-        if(line.find("#ARTIST") == 0) data.artist = line.substr(8);
-        if(line.find("#BPM") == 0) data.BPM = stod(line.substr(5));
-        if(line.find("#SONG") == 0) data.music = loadMusic(line.substr(6));
+        if(line.find("#") == 0) insertNoteData(line.substr(1));
+        else if(line.find("[TITLE]") == 0) name = line.substr(8);
+        else if(line.find("[ARTIST]") == 0) artist = line.substr(9);
+        else if(line.find("[BPM]") == 0) BPM = stod(line.substr(6));
+        else if(line.find("[OFFSET]") == 0) offset = stof(line.substr(9));
+        else if(line.find("[SONG]") == 0) music = loadMusic(line.substr(7));
       }
 
-      return data;
+    }
+
+    void displayNotes() {
+      for (Note& note : notes) {
+        note.display();
+      }
     }
 };
 
 
 void getInput(chartData& chart) {
-  if (IsKeyPressed(KEY_SPACE))
-  {
-    StopMusicStream(chart.music);
-    PlayMusicStream(chart.music);
-  }
 
-  if (IsKeyPressed(KEY_P))
+  if (IsKeyPressed(KEY_SPACE))
   {
     pause = !pause;
     if(pause) PauseMusicStream(chart.music);
@@ -102,10 +137,14 @@ int main() {
   Game game;
   chartData chart;
 
-  chart = chart.loadChartData();
+  chart.loadChartData();
   cout << "name: "<< chart.name << "\nartist: " << chart.artist << "\nBPM: " << chart.BPM << '\n';
-  
+  chart.displayNotes();
 
+
+  PlayMusicStream(chart.music);
+  pause = true;
+  PauseMusicStream(chart.music);
   while(!WindowShouldClose()) {
     BeginDrawing();
     UpdateMusicStream(chart.music);
