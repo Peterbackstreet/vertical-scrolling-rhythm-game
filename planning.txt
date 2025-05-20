@@ -43,7 +43,8 @@
   -load the notes to the note data structure
 }
 
-8. Chart Editor {
+----(probably not going to do a chart editor because I don't plan to do UI on this environment)----
+8. Chart Editor { 
   -UI 
   -loading audio
   -a timeline
