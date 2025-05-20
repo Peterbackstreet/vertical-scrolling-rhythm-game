@@ -10,6 +10,9 @@ using std::string;using std::vector;using std::cout;
 
 const Color BG = Color{0, 0, 0, 255};
 const string song_folder = "songs/";
+const int screenHeight = 720;
+const int screenWidth = 1280;
+
 
 string selected_song;
 vector<std::string> songList = {"Synthesis"};
@@ -18,7 +21,9 @@ float chartTime_curr;
 float chartLength;
 bool pause = false;
 
-float scrollSpeed = 5;
+float scrollSpeed = 1000;
+int note_thickness = 100;
+int note_height = 50;
 
 class Note {
   public:
@@ -56,7 +61,7 @@ class chartData {
       std::getline(ss, time, ':');
       std::getline(ss, hold_duration, ':');
 
-      notes.push_back(Note(stoi(type), stoi(lane), stof(time), stof(hold_duration)));
+      notes.push_back(Note(stoi(type), stoi(lane), stof(time)+offset, stof(hold_duration)));
     }
 
     Music loadMusic(string song) {
@@ -123,8 +128,11 @@ class Game{
 
     void updateNotes(chartData& chart,float chartTime) {
       for (Note& note : chart.notes) {
-        float notePos = (note.time - chartTime) * scrollSpeed;
-        cout << notePos << " ";
+        float noteY = screenHeight - (note.time - chartTime) * scrollSpeed - int(note_height/2);
+        cout << noteY << ' ';
+        if(noteY > screenHeight || noteY < 0) continue;
+        int noteX = screenWidth/2 + (note.lane-2)*note_thickness;
+        DrawRectangle(noteX, noteY, note_thickness, note_height, WHITE);
       }
       cout << std::endl;
     }
@@ -132,7 +140,7 @@ class Game{
 
 
 int main() {
-  InitWindow(1280, 720, "VSRG");
+  InitWindow(screenWidth, screenHeight, "VSRG");
   InitAudioDevice();
   SetTargetFPS(60);
 
