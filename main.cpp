@@ -13,6 +13,8 @@ const string song_folder = "songs/";
 string selected_song;
 vector<std::string> songList = {"Synthesis"};
 
+bool pause = false;
+
 class chartData {
   public:
     string name, artist;
@@ -64,11 +66,22 @@ int main() {
   chart = loadChartData();
   cout << "name: "<< chart.name << "\nartist: " << chart.artist << "\nBPM: " << chart.BPM << '\n';
 
-  PlayMusicStream(chart.music);
-
   while(!WindowShouldClose()) {
     BeginDrawing();
     UpdateMusicStream(chart.music);
+
+    if (IsKeyPressed(KEY_SPACE))
+    {
+      StopMusicStream(chart.music);
+      PlayMusicStream(chart.music);
+    }
+
+    if (IsKeyPressed(KEY_P))
+    {
+      pause = !pause;
+      if(pause) PauseMusicStream(chart.music);
+      else ResumeMusicStream(chart.music);
+    }
     ClearBackground(BG);
     EndDrawing();
   }
