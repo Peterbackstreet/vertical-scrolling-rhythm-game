@@ -1,1 +1,3 @@
-NAME
+#TITLE Synthesis
+#ARTIST tn-shi
+#BPM 180

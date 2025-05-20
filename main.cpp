@@ -1,64 +1,50 @@
 #include "include/rayib.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 
+using std::string;using std::vector;using std::cout;
+
 const Color BG = Color{0, 0, 0, 255};
 
-std::vector<std::string> songList = {"Synthesis"};
-std::string chartID, chartName, artist;
-int BPM = -1;
-Music music;
+vector<std::string> songList = {"Synthesis.txt"};
 
-void loadChart() {
-  std::ifstream chart(chartID+".txt");
+class chartData {
+  public:
+    string name, artist;
+    int BPM = -1;
+    Music music;
+};
 
-  if(!chart.is_open()) {
-    std::cerr << "file to open the chart file\n"; 
+
+chartData loadChartData() {
+  chartData data;
+  std::ifstream file(songList[0]);
+
+  if(!file.is_open()) {
+    std::cerr << "can't open " + songList[0] << '\n';
     exit(0);
   }
 
-  std::string line;
-  
-  while(std::getline(chart, line)) {
-    if(!chartName.empty() && line.substr(0,4) == "NAME") {
-      int pos = line.find(":");
-      chartName = line.substr(pos + 1);
-      continue;
-    }
-
-    if(!artist.empty() && line.substr(0,6) == "ARTIST") {
-      int pos = line.find(":");
-      artist = line.substr(pos + 1);
-      continue;
-    }
-
-    if(BPM != -1 && line.substr(0,3) == "BPM") {
-      int pos = line.find(":");
-      BPM = stoi(line.substr(pos + 1));
-      continue;
-    }
+  string line;
+  while(std::getline(file,line)) {
+    if(line.find("#TITLE") == 0) data.name = line.substr(7);
+    if(line.find("#ARTIST") == 0) data.artist = line.substr(8);
+    if(line.find("#BPM") == 0) data.BPM = stoi(line.substr(5));
   }
 
-}
-
-void songSelection() {
-  int x = -1;
-  for (int i=0 ; i<songList.size() ; i++) std::cout << i+1 << " " << songList[i] << std::endl;
-  std::cout << "enter chart number:";
-  // std::cin >> x;
-  x -= 1;
-  chartID = songList[0];
+  return data;
 }
 
 int main() {
   InitWindow(1280, 720, "VSRG");
   SetTargetFPS(60);
 
-  songSelection();
-  loadChart();
+  chartData chart;
+
+  chart = loadChartData();
+  cout << "name: "<< chart.name << "\nartist: " << chart.artist << "\nBPM: " << chart.BPM << '\n';
 
   while(!WindowShouldClose()) {
     BeginDrawing();
