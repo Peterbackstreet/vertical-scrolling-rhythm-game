@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cmath>
 
 using std::string;using std::vector;using std::cout;
 
@@ -20,7 +21,7 @@ float chartTime_curr;
 float chartLength;
 bool pause = false;
 
-float scrollSpeed = 100;
+float scrollSpeed = 1000;
 int note_thickness = 100;
 int note_height = 50;
 int hitPosHeight = 100;
@@ -32,7 +33,6 @@ class Note {
     int lane;
     float time;
     float hold_duration = 0;
-    bool judged = false;
 
     Note(int type, int lane, float time, float hold_duration) {
       this->type = type;
@@ -122,6 +122,10 @@ class Game{
         if(pause) PauseMusicStream(chart.music);
         else ResumeMusicStream(chart.music);
       }
+      if(IsKeyPressed(KEY_D)) hitInput(chart,0);
+      if(IsKeyPressed(KEY_F)) hitInput(chart,1);
+      if(IsKeyPressed(KEY_J)) hitInput(chart,2);
+      if(IsKeyPressed(KEY_K)) hitInput(chart,3);
     }
 
     void draw(chartData chart, string chartTime) {
@@ -144,6 +148,19 @@ class Game{
       cout << std::endl;
     }
 
+    void hitInput(chartData& chart, int lane) {
+      for (auto note = chart.notes.begin() ; note != chart.notes.end() ; note++) {
+        if(note->lane == lane) {
+          float offset = fabs(note->time-chartTime_curr);
+          if(offset <= 0.050) {
+            cout << "hhh\n";
+            cout << note->time << " " << chartTime_curr << '\n';
+            chart.notes.erase(note);
+          }
+          break;
+        }
+      }
+    }
 };
 
 
