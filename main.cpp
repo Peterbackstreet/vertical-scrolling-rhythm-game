@@ -13,6 +13,11 @@ const Color BG = Color{0, 0, 0, 255};
 const string song_folder = "songs/";
 const int screenHeight = 720;
 const int screenWidth = 1280;
+const float perfectWindow = 0.040;
+const float goodWindow = 0.080;
+const float badWindow = 0.100;
+const float missWindow = 0.120;
+
 
 string selected_song;
 vector<std::string> songList = {"Synthesis"};
@@ -102,17 +107,17 @@ class chartData {
       }
 
     }
-
 };
 
 
 
 class Game{
   public:
+    int score = 0;
     void update(chartData& chart) {
       chartTime_curr = GetMusicTimePlayed(chart.music);
       updateNotes(chart, chartTime_curr);
-      draw(chart, std::to_string(chartTime_curr));
+      draw(chart, std::to_string(chartTime_curr), std::to_string(score));
     }
 
     void getInput(chartData& chart) {
@@ -128,11 +133,12 @@ class Game{
       if(IsKeyPressed(KEY_K)) hitInput(chart,3);
     }
 
-    void draw(chartData chart, string chartTime) {
+    void draw(chartData chart, string chartTime, string score) {
       string length = std::to_string(chartLength);
       chartTime += " / " + length; 
       const char* timePlayed = chartTime.c_str();
       DrawText(timePlayed, 10, 10, 20, WHITE);
+      DrawText(score.c_str(), 1230, 0, 20, WHITE);
       DrawRectangle(screenWidth/2 - note_thickness*2, hitPosY, note_thickness*4, note_height/2, WHITE);
     }
 
@@ -152,10 +158,11 @@ class Game{
       for (auto note = chart.notes.begin() ; note != chart.notes.end() ; note++) {
         if(note->lane == lane) {
           float offset = fabs(note->time-chartTime_curr);
-          if(offset <= 0.050) {
-            cout << "hhh\n";
-            cout << note->time << " " << chartTime_curr << '\n';
+          if(offset <= missWindow) {
             chart.notes.erase(note);
+            if(offset <= perfectWindow) score += 50;
+            else if(offset <= goodWindow) score +=25;
+            else if(offset <= badWindow) score += 10;
           }
           break;
         }
