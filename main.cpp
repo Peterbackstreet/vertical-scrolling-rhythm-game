@@ -13,7 +13,6 @@ const string song_folder = "songs/";
 const int screenHeight = 720;
 const int screenWidth = 1280;
 
-
 string selected_song;
 vector<std::string> songList = {"Synthesis"};
 
@@ -21,9 +20,11 @@ float chartTime_curr;
 float chartLength;
 bool pause = false;
 
-float scrollSpeed = 1000;
+float scrollSpeed = 100;
 int note_thickness = 100;
 int note_height = 50;
+int hitPosHeight = 100;
+int hitPosY = screenHeight-hitPosHeight;
 
 class Note {
   public:
@@ -31,12 +32,15 @@ class Note {
     int lane;
     float time;
     float hold_duration = 0;
+    bool judged = false;
+
     Note(int type, int lane, float time, float hold_duration) {
       this->type = type;
       this->lane = lane;
       this->time = time * 0.001;
       this->hold_duration = hold_duration * 0.001;
     }
+
     void display() {
       cout << "type: " << type<< ' ';
       cout << "lane: " << lane<< ' ';
@@ -102,14 +106,6 @@ class chartData {
 };
 
 
-void getInput(chartData& chart) {
-  if (IsKeyPressed(KEY_SPACE))
-  {
-    pause = !pause;
-    if(pause) PauseMusicStream(chart.music);
-    else ResumeMusicStream(chart.music);
-  }
-}
 
 class Game{
   public:
@@ -119,23 +115,35 @@ class Game{
       draw(chart, std::to_string(chartTime_curr));
     }
 
+    void getInput(chartData& chart) {
+      if (IsKeyPressed(KEY_SPACE))
+      {
+        pause = !pause;
+        if(pause) PauseMusicStream(chart.music);
+        else ResumeMusicStream(chart.music);
+      }
+    }
+
     void draw(chartData chart, string chartTime) {
       string length = std::to_string(chartLength);
       chartTime += " / " + length; 
       const char* timePlayed = chartTime.c_str();
       DrawText(timePlayed, 10, 10, 20, WHITE);
+      DrawRectangle(screenWidth/2 - note_thickness*2, hitPosY, note_thickness*4, note_height/2, WHITE);
     }
 
     void updateNotes(chartData& chart,float chartTime) {
-      for (Note& note : chart.notes) {
-        float noteY = screenHeight - (note.time - chartTime) * scrollSpeed - int(note_height/2);
+      for (auto note = chart.notes.begin() ; note != chart.notes.end() ; note++) {
+        float noteY = screenHeight - (note->time - chartTime) * scrollSpeed - int(note_height/2) - hitPosHeight;
         cout << noteY << ' ';
-        if(noteY > screenHeight || noteY < 0) continue;
-        int noteX = screenWidth/2 + (note.lane-2)*note_thickness;
+        if(noteY < 0) continue;
+        if(noteY > screenHeight) chart.notes.erase(note);
+        int noteX = screenWidth/2 + (note->lane-2)*note_thickness;
         DrawRectangle(noteX, noteY, note_thickness, note_height, WHITE);
       }
       cout << std::endl;
     }
+
 };
 
 
@@ -158,7 +166,7 @@ int main() {
   while(!WindowShouldClose()) {
     BeginDrawing();
     UpdateMusicStream(chart.music);
-    getInput(chart);
+    game.getInput(chart);
     game.update(chart);
     ClearBackground(BG);
     EndDrawing();
